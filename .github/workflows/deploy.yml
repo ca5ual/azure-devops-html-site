@@ -1,0 +1,33 @@
+name: Deploy to Azure Web App (Container)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Log in to Azure Container Registry
+      run: az acr login --name demoappregistrycasual
+
+    - name: Build and push Docker image to ACR
+      run: |
+        docker build -t demoappregistrycasual.azurecr.io/mysite:latest .
+        docker push demoappregistrycasual.azurecr.io/mysite:latest
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: demoappsiteca5ual
+        images: demoappregistrycasual.azurecr.io/mysite:latest
